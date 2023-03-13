@@ -230,7 +230,7 @@ Public NotInheritable Class MainPage
             uiNext_Click(Nothing, Nothing)
             Return
         Catch ex As Exception
-            CrashMessageAdd("@uiOpenFolder_Click", ex)
+            Vblib.CrashMessageAdd("@uiOpenFolder_Click", ex)
         End Try
 
     End Sub
@@ -253,7 +253,7 @@ Public NotInheritable Class MainPage
             sFile = sFile & msCurrFile.Substring(iLen - 4)
 
             ' prawdopodobnie mamy nazwę pliku.
-            Await DialogBoxAsync("New file name: " & sFile)
+            Await Vblib.DialogBoxAsync("New file name: " & sFile)
 
         Else
                 For iFor As Integer = 1 To moFiles.Count - 1

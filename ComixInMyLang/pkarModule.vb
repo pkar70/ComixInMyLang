@@ -1,1 +1,1 @@
-../../_mojeSuby/pkarModule.vb
+../../MyLibs/UWPappTel/pkarModuleWithLib.vb

@@ -45,6 +45,8 @@ NotInheritable Class App
 
             ' Place the frame in the current Window
             Window.Current.Content = mRootFrame
+
+            InitLib(Nothing)
         End If
 
         Return mRootFrame
@@ -83,12 +85,18 @@ NotInheritable Class App
             Dim operation As CommandLineActivationOperation = commandLine?.Operation
             Dim strArgs As String = operation?.Arguments
 
+            InitLib(strArgs.Split(" ").ToList())
+
+
             If Not String.IsNullOrEmpty(strArgs) Then
                 Await ObsluzCommandLine(strArgs)
                 Window.Current.Close()
                 Return
             End If
         End If
+
+        InitLib(Nothing)
+
 
         ' jesli nie cmdline (a np. toast), albo cmdline bez parametrow, to pokazujemy okno
         Dim rootFrame As Frame = OnLaunchFragment(args.PreviousExecutionState)
