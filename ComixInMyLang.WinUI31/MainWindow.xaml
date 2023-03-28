@@ -1,0 +1,49 @@
+﻿<Window
+    x:Class="ComixInMyLang.WinUI31.MainWindow"
+    x:Name="FrmMain"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:local="using:ComixInMyLang.WinUI31"
+    mc:Ignorable="d" SizeChanged="Page_SizeChanged">
+
+    <Grid x:Name="uiGrid">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" x:Name="naTytul"/>
+            <RowDefinition Height="3*" x:Name="naObrazek"/>
+            <RowDefinition Height="1*" x:Name="naTekst"/>
+            <RowDefinition Height="Auto" x:Name="naCommandBar"/>
+        </Grid.RowDefinitions>
+        <TextBlock Text="Komiksowatość" HorizontalAlignment="Center" Margin="0,0,0,10" FontSize="22" FontWeight="Bold" />
+
+        <ScrollViewer Name="uiScroll" Grid.Row="1" ZoomMode="Enabled" MinZoomFactor="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"  VerticalAlignment="Stretch"  HorizontalAlignment="Stretch"  >
+            <Image x:Name="uiPic" />
+        </ScrollViewer>
+
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="0" VerticalAlignment="Top" Margin="2,20,10,0" Content="&lt;" x:Name="uiPrev"/>
+            <TextBox x:Name="uiTextOrg" Grid.Column="1" AcceptsReturn="True" ScrollViewer.VerticalScrollBarVisibility="Auto" />
+            <Button Grid.Column="2" VerticalAlignment="Top"  Margin="10,20,10,0" Content="-&gt;" Click="uiTranslate_Click" />
+            <TextBox x:Name="uiTextPL" Grid.Column="3" AcceptsReturn="True" ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+            <Button Grid.Column="4" VerticalAlignment="Top"  Margin="10,20,2,0" Content="&gt;" x:Name="uiNext"/>
+
+        </Grid>
+
+    <CommandBar ClosedDisplayMode="Minimal" x:Name="uiBottomBar" Grid.Row="3" >
+        <AppBarButton Icon="Folder" Label="Folder" Click="uiOpenFolder_Click" />
+                <AppBarButton Icon="OpenFile" Label="File" Click="uiOpenFile_Click" />
+    </CommandBar>
+
+    </Grid>
+
+
+</Window>

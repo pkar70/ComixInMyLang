@@ -34,7 +34,9 @@ Public NotInheritable Class MainPage
         oFile = Await BrowseFile()
         If oFile Is Nothing Then Return
 
-        If oFile.FileType = ".cbr" OrElse oFile.FileType = ".cbz" Then
+        Dim fileExt As String = oFile.FileType.ToLowerInvariant
+
+        If fileExt = ".cbr" OrElse fileExt = ".cbz" Then
             Dim oArchive = SharpCompress.Readers.ReaderFactory.Open(oFile.OpenStreamForReadAsync.Result)
             While oArchive.MoveToNextEntry
                 If Not oArchive.Entry.IsDirectory Then

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ComixOCR": {
+      "commandName": "Project",
+      "commandLineArgs": "\"L:\\Backup\\Gotowe\\_ksiazki\\komiksyDoTlum\\10 Years to Death do 1 korekty.CBZ\""
+    }
+  }
+}
