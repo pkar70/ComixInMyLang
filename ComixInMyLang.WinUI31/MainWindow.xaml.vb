@@ -1,6 +1,7 @@
 ﻿Option Strict On
 
 Imports System.Collections.ObjectModel
+Imports System.Drawing
 Imports System.IO
 'Imports System.Reflection.Metadata
 'Imports System.Runtime.CompilerServices
@@ -33,25 +34,33 @@ Public Class MainWindow
     End Sub
 
     Private Sub TryCustomizeTitleBar(useAcrylic As Boolean)
-        Dim appWnd = GetAppWindow
-        Dim titleBar = appWnd.TitleBar
-        If titleBar IsNot Nothing Then
-            ' Windows 11 or Windows 10
-            With appWnd.TitleBar
-                .ExtendsContentIntoTitleBar = True
-                .ButtonBackgroundColor = Colors.Transparent
-            End With
-            Dim titleBarHeight = appWnd.GetTitleBarHeight
+        Try
 
-            uiGrid.RowDefinitions(0).Height = New GridLength(titleBarHeight + 4, GridUnitType.Pixel)
-            If Not useAcrylic Then
-                uiGrid.Background = Nothing
-                '    ConvertingFiles.Background = Nothing
+            Dim appWnd = GetAppWindow
+            Dim titleBar = appWnd.TitleBar
+            If titleBar IsNot Nothing Then
+                ' Windows 11 or Windows 10
+                With appWnd.TitleBar
+                    .ExtendsContentIntoTitleBar = True
+                    .ButtonBackgroundColor = Colors.Transparent
+                End With
+                Dim titleBarHeight = appWnd.GetTitleBarHeight
+
+                uiGrid.RowDefinitions(0).Height = New GridLength(titleBarHeight + 4, GridUnitType.Pixel)
+                If Not useAcrylic Then
+                    uiGrid.Background = Nothing
+                    '    ConvertingFiles.Background = Nothing
+                End If
+            Else
+                ' Windows 10
+                'TblTitleText.Visibility = Visibility.Collapsed
             End If
-        Else
-            ' Windows 10
-            'TblTitleText.Visibility = Visibility.Collapsed
-        End If
+
+        Catch ex As Exception
+
+        End Try
+
+
     End Sub
 
     Private _loaded As Boolean
@@ -112,14 +121,19 @@ Public Class MainWindow
                     oStream.CopyTo(oMemStream)
 
                     oMemStream.Seek(0, SeekOrigin.Begin)
+
+                    Await ZrobOCRIron(oMemStream)
+                    oMemStream.Seek(0, SeekOrigin.Begin)
+
                     Dim oDecoder As Windows.Graphics.Imaging.BitmapDecoder
                     oDecoder = Await Windows.Graphics.Imaging.BitmapDecoder.CreateAsync(oMemStream.AsRandomAccessStream)
                     moSoftBmp = Await oDecoder.GetSoftwareBitmapAsync()
 
+
                     oStream.Dispose()
                     oMemStream.Dispose()
 
-                    Await ZrobOCR()
+                    Await ZrobOCRWindows(moSoftBmp)
 
                 Catch ex As Exception
                     Exit While
@@ -137,7 +151,7 @@ Public Class MainWindow
             Await PokazObrazek(oFile)
 
             ' ocr file
-            Await ZrobOCR()
+            'Await ZrobOCRWindows()
         End If
 
     End Sub
@@ -178,11 +192,43 @@ Public Class MainWindow
 
         Return oFolder
     End Function
-
-    Private Async Function ZrobOCR() As Task(Of Boolean)
+    Private Async Function ZrobOCRIron(oMemStream As MemoryStream) As Task(Of Boolean)
         If mlTeksty Is Nothing Then mlTeksty = New Collection(Of JedenText)
 
-        Dim rOCR As Windows.Media.Ocr.OcrResult = Await Windows.Media.Ocr.OcrEngine.TryCreateFromUserProfileLanguages().RecognizeAsync(moSoftBmp)
+        Dim eOCR As New IronOcr.IronTesseract
+
+        Dim input As New IronOcr.OcrInput(oMemStream)
+
+        Dim rOCR = Await eOCR.ReadAsync(input)
+
+        Dim sInput As String = uiTextOrg.Text
+        sInput = sInput & vbCrLf & vbCrLf & msCurrFile & vbCrLf & vbCrLf & rOCR.Text & vbCrLf & vbCrLf
+        uiTextOrg.Text = sInput
+
+        Dim oNew As JedenText = New JedenText
+        oNew.sFileName = msCurrFile
+        oNew.sOriginal = vbCrLf & vbCrLf & vbCrLf & vbCrLf & vbCrLf & msCurrFile & vbCrLf & vbCrLf
+        mlTeksty.Add(oNew)
+
+        For Each oLine In rOCR.Blocks
+            oNew = New JedenText
+            oNew.sFileName = msCurrFile
+            oNew.sOriginal = oLine.Text.ToLower
+            oNew.RogX = oLine.X
+            oNew.RogY = oLine.Y
+            mlTeksty.Add(oNew)
+            sInput = sInput & vbCrLf & oNew.sOriginal
+        Next
+
+
+        Return True
+
+    End Function
+
+    Private Async Function ZrobOCRWindows(oSoftBmp As Windows.Graphics.Imaging.SoftwareBitmap) As Task(Of Boolean)
+        If mlTeksty Is Nothing Then mlTeksty = New Collection(Of JedenText)
+
+        Dim rOCR As Windows.Media.Ocr.OcrResult = Await Windows.Media.Ocr.OcrEngine.TryCreateFromUserProfileLanguages().RecognizeAsync(oSoftBmp)
 
         Dim sInput As String = uiTextOrg.Text
         If rOCR.Lines.Count < 1 Then Return False
@@ -198,6 +244,10 @@ Public Class MainWindow
             oNew = New JedenText
             oNew.sFileName = msCurrFile
             oNew.sOriginal = oLine.Text.ToLower
+            If oLine.Words IsNot Nothing AndAlso oLine.Words.Count > 0 Then
+                oNew.RogX = oLine.Words(0).BoundingRect.X
+                oNew.RogY = oLine.Words(0).BoundingRect.Y
+            End If
             mlTeksty.Add(oNew)
             sInput = sInput & vbCrLf & oNew.sOriginal
         Next
@@ -284,7 +334,7 @@ Public Class MainWindow
                 oStream.Dispose()
 
                 ' ocr file
-                Await ZrobOCR()
+                Await ZrobOCRWindows(moSoftBmp)
 
             Next
 
@@ -375,4 +425,7 @@ Public Class JedenText
     Public Property sFileName As String
     Public Property sOriginal As String
     Public Property sTranslation As String
+    Public Property RogX As Double
+    Public Property RogY As Double
+
 End Class

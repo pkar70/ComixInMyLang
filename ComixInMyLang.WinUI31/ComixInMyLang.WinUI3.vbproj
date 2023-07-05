@@ -16,8 +16,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="IronOcr" Version="2023.3.2" />
+    <PackageReference Include="IronOcr.Languages.French" Version="2020.11.2" />
+    <PackageReference Include="IronOcr.Languages.Polish" Version="2020.11.2" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.2.230313.1" />
     <PackageReference Include="SharpCompress" Version="0.33.0" />
+    <PackageReference Include="System.Drawing.Common" Version="7.0.0" />
   </ItemGroup>
   
   <PropertyGroup>
